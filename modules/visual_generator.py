@@ -66,18 +66,22 @@ def _generate_pollinations_image(prompt: str, save_path: Path, scene_num: int) -
     """
     # Enhance the prompt for better quality
     enhanced_prompt = (
-        f"{prompt}, ultra high quality, 8K, cinematic lighting, "
-        f"photorealistic, vertical composition 9:16, stunning detail, "
-        f"professional photography, dramatic atmosphere"
+        f"{prompt}, ultra high quality, 8K resolution, cinematic lighting, "
+        f"photorealistic, vertical composition 9:16 aspect ratio, stunning detail, "
+        f"professional photography, dramatic atmosphere, sharp focus, "
+        f"masterpiece quality, highly detailed"
     )
 
     encoded_prompt = urllib.parse.quote(enhanced_prompt)
+    # Use negative seed for better variety and quality
+    unique_seed = int(time.time() * 1000) + scene_num * 100
     url = (
         f"https://image.pollinations.ai/prompt/{encoded_prompt}"
         f"?width={config.POLLINATIONS_WIDTH}"
         f"&height={config.POLLINATIONS_HEIGHT}"
-        f"&seed={int(time.time()) + scene_num}"
+        f"&seed={unique_seed}"
         f"&nologo=true"
+        f"&enhance=true"
         f"&model=flux"
     )
 

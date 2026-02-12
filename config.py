@@ -64,12 +64,12 @@ EXPORT_AUDIO_CODEC = "aac"
 EXPORT_BITRATE = "8M"
 
 # ─── Text Overlays ───────────────────────────────────────────────────────────
-OVERLAY_FONT_SIZE = 52
+OVERLAY_FONT_SIZE = 56
 OVERLAY_FONT_COLOR = "white"
 OVERLAY_FONT = "Arial-Bold"
 OVERLAY_STROKE_COLOR = "black"
 OVERLAY_STROKE_WIDTH = 3
-OVERLAY_POSITION = ("center", 0.78)  # (x, y%) from top
+OVERLAY_POSITION = ("center", 0.70)  # (x, y%) from top - moved higher to prevent cutoff
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

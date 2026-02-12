@@ -135,16 +135,13 @@ def assemble_reel(
         if i < len(narration_paths) and narration_paths[i] and narration_paths[i].exists():
             try:
                 narr = AudioFileClip(str(narration_paths[i]))
-                # Trim a tiny bit off the end to prevent boundary errors
-                safe_duration = narr.duration - 0.1
-                if safe_duration > 0:
-                    narr = narr.subclipped(0, safe_duration)
-                    narr = narr.with_start(scene_start_times[i])
-                    audio_clips.append(narr)
-                    logger.debug(
-                        f"Scene {scene['scene_number']}: narration at t={scene_start_times[i]:.1f}s "
-                        f"({safe_duration:.1f}s)"
-                    )
+                # Position narration at scene start time
+                narr = narr.with_start(scene_start_times[i])
+                audio_clips.append(narr)
+                logger.debug(
+                    f"Scene {scene['scene_number']}: narration at t={scene_start_times[i]:.1f}s "
+                    f"({narr.duration:.1f}s)"
+                )
             except Exception as e:
                 logger.warning(f"Scene {scene['scene_number']}: Failed to load narration: {e}")
 
@@ -160,8 +157,8 @@ def assemble_reel(
                 music_parts = [music_audio] * loops_needed
                 music_audio = concatenate_audioclips(music_parts)
 
-            # Trim to video length with safety margin
-            music_audio = music_audio.subclipped(0, total_video_duration - 0.05)
+            # Trim to video length
+            music_audio = music_audio.subclipped(0, total_video_duration)
             music_audio = music_audio.with_volume_scaled(config.MUSIC_VOLUME)
             audio_clips.append(music_audio)
         except Exception as e:
