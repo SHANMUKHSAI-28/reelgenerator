@@ -130,17 +130,36 @@ def assemble_reel(
 
     audio_clips = []
 
-    # Add narration clips at calculated timestamps
+    # Add narration clips — prevent overlap by tracking when each ends
+    narration_cursor = 0.0  # Earliest time the next narration can start
+    NARRATION_GAP = 0.3     # Minimum silence gap between narrations (seconds)
+
     for i, scene in enumerate(scenes):
         if i < len(narration_paths) and narration_paths[i] and narration_paths[i].exists():
             try:
                 narr = AudioFileClip(str(narration_paths[i]))
-                # Position narration at scene start time
-                narr = narr.with_start(scene_start_times[i])
+
+                # Ideal start = scene start time, but never before previous narration ends
+                ideal_start = scene_start_times[i]
+                safe_start = max(ideal_start, narration_cursor)
+
+                # Ensure narration doesn't exceed this scene's visual end time
+                scene_end = scene_start_times[i] + scene_durations[i]
+                if safe_start + narr.duration > scene_end + 0.2:
+                    # Trim narration to fit within scene bounds (+ tiny grace)
+                    available = max(scene_end - safe_start, 0.5)
+                    narr = narr.subclipped(0, min(narr.duration, available))
+                    logger.debug(f"Scene {scene['scene_number']}: trimmed narration to {narr.duration:.1f}s")
+
+                narr = narr.with_start(safe_start)
                 audio_clips.append(narr)
+
+                # Update cursor so next narration starts after this one + gap
+                narration_cursor = safe_start + narr.duration + NARRATION_GAP
+
                 logger.debug(
-                    f"Scene {scene['scene_number']}: narration at t={scene_start_times[i]:.1f}s "
-                    f"({narr.duration:.1f}s)"
+                    f"Scene {scene['scene_number']}: narration at t={safe_start:.1f}s "
+                    f"({narr.duration:.1f}s) → ends at {safe_start + narr.duration:.1f}s"
                 )
             except Exception as e:
                 logger.warning(f"Scene {scene['scene_number']}: Failed to load narration: {e}")

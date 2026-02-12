@@ -66,29 +66,37 @@ def generate_scene_images(script: dict, output_dir: Optional[Path] = None) -> li
 def _generate_pollinations_image(prompt: str, save_path: Path, scene_num: int) -> Path:
     """
     Generate an image via Pollinations.ai free API.
-    Uses the Flux model with enhanced prompting for cinematic quality.
+    Uses the Flux-Realism model for photorealistic quality.
+
+    Strategy:
+    - Generate at 768×1344 (native sweet-spot for Flux) then upscale to
+      1080×1920 with LANCZOS — produces sharper results than generating
+      at full resolution directly.
+    - Use flux-realism model for photorealistic output.
+    - Keep prompt clean and descriptive (avoid spammy quality tags).
     """
-    # Enhanced quality prompt — specific, structured for Flux
+    # Clean, descriptive prompt — Flux-realism works best with natural language
     enhanced_prompt = (
-        f"((masterpiece)), ((best quality)), ((ultra-detailed)), "
         f"{prompt}, "
-        f"cinematic lighting, volumetric light, ray tracing, "
-        f"sharp focus, depth of field, bokeh, "
-        f"photorealistic, 8K UHD, DSLR quality, "
-        f"vertical portrait composition 9:16 aspect ratio, "
-        f"color graded, film grain, professional photography"
+        f"photorealistic, cinematic lighting, shallow depth of field, "
+        f"sharp focus, high detail, professional DSLR photo, "
+        f"9:16 vertical composition"
     )
+
+    # Generate at a lower native res (Flux sweet-spot) then upscale
+    gen_width = 768
+    gen_height = 1344
 
     encoded_prompt = urllib.parse.quote(enhanced_prompt)
     unique_seed = int(time.time() * 1000) + scene_num * 137
     url = (
         f"https://image.pollinations.ai/prompt/{encoded_prompt}"
-        f"?width={config.POLLINATIONS_WIDTH}"
-        f"&height={config.POLLINATIONS_HEIGHT}"
+        f"?width={gen_width}"
+        f"&height={gen_height}"
         f"&seed={unique_seed}"
         f"&nologo=true"
         f"&enhance=true"
-        f"&model=flux"
+        f"&model=flux-realism"
     )
 
     logger.debug(f"Pollinations URL length: {len(url)} chars")
@@ -103,14 +111,15 @@ def _generate_pollinations_image(prompt: str, save_path: Path, scene_num: int) -
 
     save_path.write_bytes(response.content)
 
-    # Resize to exact reel dimensions with high-quality resampling
+    # Upscale to full reel resolution with high-quality resampling + sharpening
     with Image.open(save_path) as img:
-        if img.size != (config.REEL_WIDTH, config.REEL_HEIGHT):
-            # Use LANCZOS for highest quality downscale
-            img = img.resize(
-                (config.REEL_WIDTH, config.REEL_HEIGHT),
-                Image.Resampling.LANCZOS
-            )
+        # LANCZOS upscale from 768×1344 → 1080×1920
+        img = img.resize(
+            (config.REEL_WIDTH, config.REEL_HEIGHT),
+            Image.Resampling.LANCZOS,
+        )
+        # Unsharp mask recovers fine detail lost during upscale
+        img = img.filter(ImageFilter.UnsharpMask(radius=1.5, percent=80, threshold=2))
         # Save as high-quality PNG
         img.save(save_path, "PNG", optimize=True)
 
@@ -128,24 +137,16 @@ def _post_process_image(image_path: Path) -> None:
     4. Slight vignette — draws focus to center
     """
     with Image.open(image_path) as img:
-        # 1. Sharpening (mild — enhance detail without artifacts)
-        sharpener = ImageEnhance.Sharpness(img)
-        img = sharpener.enhance(1.3)
-
-        # 2. Contrast boost (subtle cinematic pop)
+        # 1. Mild contrast boost — cinematic pop without crushing blacks
         contrast = ImageEnhance.Contrast(img)
-        img = contrast.enhance(1.15)
+        img = contrast.enhance(1.08)
 
-        # 3. Color saturation (slightly richer colors)
+        # 2. Subtle color richness
         color = ImageEnhance.Color(img)
-        img = color.enhance(1.12)
+        img = color.enhance(1.06)
 
-        # 4. Brightness — slight lift to avoid muddy darks
-        brightness = ImageEnhance.Brightness(img)
-        img = brightness.enhance(1.03)
-
-        # 5. Vignette effect — darkens edges, focuses center
-        img = _apply_vignette(img, intensity=0.35)
+        # 3. Light vignette — draws eye to center
+        img = _apply_vignette(img, intensity=0.20)
 
         img.save(image_path, "PNG", optimize=True)
 

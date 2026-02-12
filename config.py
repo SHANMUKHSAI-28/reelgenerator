@@ -31,7 +31,7 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
 #          "mistralai/mistral-7b-instruct:free",
 #          "google/gemma-2-9b-it:free",
 #          "qwen/qwen-2-7b-instruct:free"
-LLM_MODEL = os.getenv("LLM_MODEL", "meta-llama/llama-3.1-8b-instruct:free")
+LLM_MODEL = os.getenv("LLM_MODEL", "openai/gpt-oss-120b:free")
 
 # ─── Visual Generation ────────────────────────────────────────────────────────
 # Pollinations.ai — completely free, no API key needed
@@ -57,8 +57,8 @@ MUSIC_VOLUME = 0.15  # Background music volume (0.0 to 1.0)
 REEL_WIDTH = 1080
 REEL_HEIGHT = 1920
 REEL_FPS = 30
-SCENE_DURATION = 4.0  # Default seconds per scene
-CROSSFADE_DURATION = 0.5
+SCENE_DURATION = 5.0  # Default seconds per scene (gives narration room to breathe)
+CROSSFADE_DURATION = 0.4
 EXPORT_CODEC = "libx264"
 EXPORT_AUDIO_CODEC = "aac"
 EXPORT_BITRATE = "8M"
