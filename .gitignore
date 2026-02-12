@@ -1,0 +1,9 @@
+output/
+temp/
+logs/
+assets/music/*.mp3
+assets/music/*.wav
+__pycache__/
+*.pyc
+.env
+*.mp4
