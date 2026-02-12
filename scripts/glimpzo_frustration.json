@@ -1,0 +1,42 @@
+{
+  "title": "Glimpzo - You're Not Late",
+  "emotional_core": "You're not untalented — you're just unseen.",
+  "audio_tone": "dark ambient tension building to hopeful bright resolution, soft piano",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "visual_prompt": "Dark moody close-up of a smartphone screen showing an Instagram post with only 2 likes, dimly lit room, blue screen glow on face, feeling of isolation, cinematic shallow depth of field, melancholic atmosphere, 9:16 vertical",
+      "text_overlay": "Be honest… how many likes did you get?",
+      "narration": "Be honest with yourself. How many likes did your last post really get?",
+      "duration": 4.0
+    },
+    {
+      "scene_number": 2,
+      "visual_prompt": "Cinematic overhead shot of a creator working late at night, laptop glowing, video editing timeline on screen, coffee cups scattered, warm desk lamp, dedication and exhaustion, moody dark room with warm accent light, 9:16 vertical",
+      "text_overlay": "You edit for hours. Post consistently.",
+      "narration": "You edit for hours. You post consistently. You give it everything.",
+      "duration": 4.0
+    },
+    {
+      "scene_number": 3,
+      "visual_prompt": "Cinematic close-up of a phone screen showing pull-to-refresh with zero new notifications, hand holding phone with defeated grip, dark background fading to grey, empty social media feed, silence visualized, 9:16 vertical",
+      "text_overlay": "Still… silence.",
+      "narration": "And still... silence. Nothing changes.",
+      "duration": 3.5
+    },
+    {
+      "scene_number": 4,
+      "visual_prompt": "Bright cinematic sunrise shot transitioning from darkness, golden light breaking through clouds, a fresh clean social media feed with growing engagement, warm hopeful colors, new beginning atmosphere, lens flare, 9:16 vertical",
+      "text_overlay": "What if you were early?",
+      "narration": "But what if you weren't late? What if you were early?",
+      "duration": 4.0
+    },
+    {
+      "scene_number": 5,
+      "visual_prompt": "Clean modern bright aesthetic, Glimpzo logo/brand on a minimalist glowing screen, warm golden lighting, new platform feel, opportunity and openness, fresh start energy, soft bokeh background, premium feel, 9:16 vertical",
+      "text_overlay": "Start where visibility is still possible.",
+      "narration": "Start where visibility is still possible. Glimpzo.",
+      "duration": 4.5
+    }
+  ]
+}

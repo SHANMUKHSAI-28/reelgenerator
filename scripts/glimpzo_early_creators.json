@@ -1,0 +1,42 @@
+{
+  "title": "Glimpzo - Built for Creators",
+  "emotional_core": "The early ones always win. Be early.",
+  "audio_tone": "lo-fi ambient with soft beats, warm and inviting, gentle crescendo",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "visual_prompt": "Cinematic wide shot of a crowded noisy marketplace representing oversaturated social media, hundreds of people shouting for attention, chaotic neon signs, overwhelming visual noise, dark moody atmosphere, 9:16 vertical",
+      "text_overlay": "Everyone is screaming for attention.",
+      "narration": "Everyone is screaming for attention on the same crowded platforms.",
+      "duration": 4.0
+    },
+    {
+      "scene_number": 2,
+      "visual_prompt": "Cinematic shot of a lone creator sitting quietly in a peaceful empty room, soft golden window light, laptop open with creative work, calm confident expression, contrast to chaos, minimalist aesthetic, 9:16 vertical",
+      "text_overlay": "What if there was a quieter stage?",
+      "narration": "What if there was a quieter stage, built just for creators like you?",
+      "duration": 4.0
+    },
+    {
+      "scene_number": 3,
+      "visual_prompt": "Beautiful cinematic shot of a fresh new digital platform interface glowing softly, clean modern design, growing follower count animation, engagement notifications popping up, hopeful warm lighting, premium feel, 9:16 vertical",
+      "text_overlay": "A place where your work gets seen.",
+      "narration": "A place where your work actually gets seen. Where the algorithm isn't against you.",
+      "duration": 4.5
+    },
+    {
+      "scene_number": 4,
+      "visual_prompt": "Cinematic golden hour shot of diverse young creators smiling confidently, holding cameras and phones, warm sunlight, community feeling, success energy, bright optimistic colors, professional photography, 9:16 vertical",
+      "text_overlay": "The early ones always win.",
+      "narration": "The early ones always win. Don't wait for the crowd.",
+      "duration": 4.0
+    },
+    {
+      "scene_number": 5,
+      "visual_prompt": "Clean premium brand shot with Glimpzo text on a sleek dark background with subtle golden accents, modern typography, call to action energy, professional brand aesthetic, spotlight lighting, 9:16 vertical",
+      "text_overlay": "Join Glimpzo. Be seen.",
+      "narration": "Join Glimpzo. Be seen.",
+      "duration": 3.5
+    }
+  ]
+}

@@ -3,8 +3,11 @@ Module 2 — Visual Generator
 ============================
 Generates cinematic AI images for each scene using Pollinations.ai (100% free, no API key).
 
-Falls back to gradient placeholder images if generation fails.
-Each image is 1080x1920 (vertical 9:16 for reels).
+Features:
+- AI image generation via Pollinations.ai (Flux model)
+- Post-processing pipeline: sharpening, contrast, color boost, vignette
+- Falls back to gradient placeholder images if generation fails
+- Each image is 1080x1920 (vertical 9:16 for reels)
 """
 
 import logging
@@ -14,7 +17,7 @@ from pathlib import Path
 from typing import Optional
 
 import requests
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance, ImageOps
 
 import config
 
@@ -45,7 +48,9 @@ def generate_scene_images(script: dict, output_dir: Optional[Path] = None) -> li
 
         try:
             image_path = _generate_pollinations_image(prompt, image_path, scene_num)
-            logger.info(f"Scene {scene_num} visual saved: {image_path}")
+            # Apply cinematic post-processing
+            _post_process_image(image_path)
+            logger.info(f"Scene {scene_num} visual saved + enhanced: {image_path}")
         except Exception as e:
             logger.warning(f"Scene {scene_num} Pollinations failed ({e}), using gradient placeholder")
             image_path = _generate_placeholder(
@@ -61,20 +66,21 @@ def generate_scene_images(script: dict, output_dir: Optional[Path] = None) -> li
 def _generate_pollinations_image(prompt: str, save_path: Path, scene_num: int) -> Path:
     """
     Generate an image via Pollinations.ai free API.
-
-    The API works by encoding the prompt in the URL — no key needed.
+    Uses the Flux model with enhanced prompting for cinematic quality.
     """
-    # Enhance the prompt for better quality
+    # Enhanced quality prompt — specific, structured for Flux
     enhanced_prompt = (
-        f"{prompt}, ultra high quality, 8K resolution, cinematic lighting, "
-        f"photorealistic, vertical composition 9:16 aspect ratio, stunning detail, "
-        f"professional photography, dramatic atmosphere, sharp focus, "
-        f"masterpiece quality, highly detailed"
+        f"((masterpiece)), ((best quality)), ((ultra-detailed)), "
+        f"{prompt}, "
+        f"cinematic lighting, volumetric light, ray tracing, "
+        f"sharp focus, depth of field, bokeh, "
+        f"photorealistic, 8K UHD, DSLR quality, "
+        f"vertical portrait composition 9:16 aspect ratio, "
+        f"color graded, film grain, professional photography"
     )
 
     encoded_prompt = urllib.parse.quote(enhanced_prompt)
-    # Use negative seed for better variety and quality
-    unique_seed = int(time.time() * 1000) + scene_num * 100
+    unique_seed = int(time.time() * 1000) + scene_num * 137
     url = (
         f"https://image.pollinations.ai/prompt/{encoded_prompt}"
         f"?width={config.POLLINATIONS_WIDTH}"
@@ -97,16 +103,73 @@ def _generate_pollinations_image(prompt: str, save_path: Path, scene_num: int) -
 
     save_path.write_bytes(response.content)
 
-    # Verify and resize if needed
+    # Resize to exact reel dimensions with high-quality resampling
     with Image.open(save_path) as img:
         if img.size != (config.REEL_WIDTH, config.REEL_HEIGHT):
+            # Use LANCZOS for highest quality downscale
             img = img.resize(
                 (config.REEL_WIDTH, config.REEL_HEIGHT),
                 Image.Resampling.LANCZOS
             )
-            img.save(save_path, "PNG", quality=95)
+        # Save as high-quality PNG
+        img.save(save_path, "PNG", optimize=True)
 
     return save_path
+
+
+def _post_process_image(image_path: Path) -> None:
+    """
+    Apply cinematic post-processing to enhance image quality.
+
+    Pipeline:
+    1. Sharpening — recover detail lost in compression
+    2. Contrast boost — cinematic punch
+    3. Color saturation — vivid but not overdone
+    4. Slight vignette — draws focus to center
+    """
+    with Image.open(image_path) as img:
+        # 1. Sharpening (mild — enhance detail without artifacts)
+        sharpener = ImageEnhance.Sharpness(img)
+        img = sharpener.enhance(1.3)
+
+        # 2. Contrast boost (subtle cinematic pop)
+        contrast = ImageEnhance.Contrast(img)
+        img = contrast.enhance(1.15)
+
+        # 3. Color saturation (slightly richer colors)
+        color = ImageEnhance.Color(img)
+        img = color.enhance(1.12)
+
+        # 4. Brightness — slight lift to avoid muddy darks
+        brightness = ImageEnhance.Brightness(img)
+        img = brightness.enhance(1.03)
+
+        # 5. Vignette effect — darkens edges, focuses center
+        img = _apply_vignette(img, intensity=0.35)
+
+        img.save(image_path, "PNG", optimize=True)
+
+    logger.debug(f"Post-processing applied: {image_path.name}")
+
+
+def _apply_vignette(img: Image.Image, intensity: float = 0.3) -> Image.Image:
+    """Apply a subtle vignette (darkened edges) for cinematic feel."""
+    import numpy as np
+
+    w, h = img.size
+    arr = np.array(img, dtype=np.float32)
+
+    # Create radial gradient mask
+    Y, X = np.ogrid[:h, :w]
+    cx, cy = w / 2, h / 2
+    # Normalized distance from center (0 at center, 1 at corners)
+    dist = np.sqrt((X - cx) ** 2 / (cx ** 2) + (Y - cy) ** 2 / (cy ** 2))
+    # Vignette: darken beyond 60% radius
+    vignette = np.clip(1.0 - intensity * np.maximum(dist - 0.6, 0) / 0.8, 0, 1)
+    vignette = vignette[:, :, np.newaxis]  # broadcast to RGB
+
+    result = (arr * vignette).astype(np.uint8)
+    return Image.fromarray(result)
 
 
 def _generate_placeholder(save_path: Path, scene_num: int, text: str) -> Path:
